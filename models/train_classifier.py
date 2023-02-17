@@ -22,29 +22,41 @@ from sklearn.multioutput import MultiOutputClassifier
 from sklearn.metrics import classification_report
 
 def load_data(database_filepath):
-    engine = create_engine('sqlite:///DisasterResponse.db')
-    df = pd.read_sql_table('DisasterResponse', engine)
+    """
+        Loads cleaned data from the sqlite database
+    Args: 
+        database_filepath: path of the database file
+    Returns: 
+        X: messages dataframe (target variable)
+        Y: features dataframe (features)
+        category_names: list of column names
+    """
+    engine = create_engine('sqlite:///{}'.format(database_filepath))
+    df = pd.read_sql_table('disaster_response', engine)
     X = df['message']
     Y = df.drop(['id', 'message', 'original', 'genre'], axis=1)
     
-    return df, X, Y
+    return X, Y, Y.columns
 
 
 def tokenize(text):
-       # Define url pattern
+    """
+      tokenize text
+    Args: 
+        text: the text to tokenize
+    Returns: 
+        cleaned tokens
+    """   
     url_re = 'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\), ]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
     
-    # Detect and replace urls
     detected_urls = re.findall(url_re, text)
     for url in detected_urls:
         text = text.replace(url, "urlplaceholder")
     
-    # tokenize sentences
     tokens = word_tokenize(text)
     lemmatizer = WordNetLemmatizer()
     
     clean_tokens = []
-    # save cleaned tokens
     for tok in tokens:
         clean_tok = lemmatizer.lemmatize(tok).lower().strip()
         clean_tokens.append(clean_tok)
@@ -53,6 +65,13 @@ def tokenize(text):
 
 
 def build_model():
+    """
+      build model pipeline and run hyperparameter tuning
+    Args: 
+        None
+    Returns: 
+        cross validated classifier object
+    """   
     pipeline = Pipeline([
         ('vect', CountVectorizer(tokenizer=tokenize)),
         ('tfidf', TfidfTransformer()),
@@ -60,7 +79,7 @@ def build_model():
     ])
     
     parameters = {
-    'clf__estimator__n_estimators': [50, 100, 200],
+    'clf__estimator__n_estimators': [50],
     }
 
     cv = GridSearchCV(pipeline, param_grid=parameters)
@@ -69,18 +88,34 @@ def build_model():
     
 
 def evaluate_model(model, X_test, Y_test, category_names):
-    
-    X_train, X_test, y_train, y_test = train_test_split(X, Y)
-    
-    
-    y_pred = pipeline.predict(X_test)
+    """
+        Evaluate the model performances using classification report
+    Args: 
+        model: the model to be evaluated
+        X_test: X_test dataframe
+        Y_test: Y_test dataframe
+        category_names: list of category names
+    Returns: 
+        None
+    """ 
+        
+    y_pred = model.predict(X_test)
 
-    for columns in y_test:
-        print(classification_report(y_test, y_pred, target_names=category_names))
+    for columns in Y_test:
+        print(classification_report(Y_test, y_pred, target_names=category_names))
 
 
 def save_model(model, model_filepath):
-    joblib.dump(model, open(model_filepath, 'wb'))
+    """
+        Save model to pickle
+    Args: 
+        model: the model to be saved
+        model_filepath: filepath to be saved in
+    Returns: 
+        None
+        
+    """
+    pickle.dump(model, open(model_filepath, 'wb'))
 
 
 def main():
