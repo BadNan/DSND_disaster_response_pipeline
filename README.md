@@ -6,17 +6,17 @@ A machine learning pipeline is built that classifies disaster messages. The pipe
 ## Files in Repo:
 The project contains the following files:
 
-data folder: 
+- data folder: 
 
 disaster_categories.csv: categories data
 disaster_messages.csv: messages data
 process_data.py: python file used to load and clean data
 
-models folder:
+- models folder:
 
 train_classifier.py: python file used to create the ML pipeline
 
-app folder:
+- app folder:
 
 run.py: python fileto connect and start web app
 
