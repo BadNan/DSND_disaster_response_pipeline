@@ -4,6 +4,14 @@ import numpy as n
 from sqlalchemy import create_engine
 
 def load_data(messages_filepath, categories_filepath):
+    """
+        Loads data
+    Args: 
+        messages_filepath: the filepath for messages csv file
+        categories_filepath: the filepath for categories csv file
+    Returns: 
+        df: messages and categories files merged dataframe
+    """
     messages = pd.read_csv(messages_filepath)
     categories = pd.read_csv(categories_filepath)
     df = pd.merge(messages, categories, on = 'id')
@@ -11,16 +19,20 @@ def load_data(messages_filepath, categories_filepath):
     return df
 
 def clean_data(df):
+    """
+        Clean the the data by renaming columns and removing duplicates 
+    Args: 
+        df: The original dataframe
+    Returns: 
+        df: The cleaned dataframe
+    """
     categories = df['categories'].str.split(';', expand=True)
     row = categories.iloc[0]
     category_colnames = row.apply(lambda x: x.split('-')[0])
     categories.columns = category_colnames
     
     for column in categories:
-        # set each value to be the last character of the string
         categories[column] = categories[column].astype(str).apply(lambda x: x.split('-')[1])
-    
-        # convert column from string to numeric
         categories[column] = categories[column].astype(int)
     
     df.drop('categories', axis=1, inplace=True)
@@ -31,8 +43,16 @@ def clean_data(df):
     return df
 
 def save_data(df, database_filename):
-    engine = create_engine('sqlite:///DisasterResponse.db')
-    df.to_sql('DisasterResponse', engine, index=False, if_exists='replace')  
+    """
+        Save cleaned dataframe into sqlite database
+    Args: 
+        df: The cleaned dataframe
+        database_filename: name of the database
+    Returns: 
+        None
+    """
+    engine = create_engine('sqlite:///{}'.format(database_filename))
+    df.to_sql('disaster_response', engine, if_exists='replace', index=False)
 
 
 def main():
