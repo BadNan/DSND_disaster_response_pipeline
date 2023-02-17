@@ -8,17 +8,17 @@ The project contains the following files:
 
 - data folder: 
 
-disaster_categories.csv: categories data
-disaster_messages.csv: messages data
-process_data.py: python file used to load and clean data
+1. disaster_categories.csv: categories data
+2. disaster_messages.csv: messages data
+3. process_data.py: python file used to load and clean data
 
 - models folder:
 
-train_classifier.py: python file used to create the ML pipeline
+1. train_classifier.py: python file used to create the ML pipeline
 
 - app folder:
 
-run.py: python fileto connect and start web app
+1. run.py: python fileto connect and start web app
 
 ## How to run the Python scripts and web app
 
